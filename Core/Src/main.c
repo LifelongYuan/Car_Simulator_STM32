@@ -59,6 +59,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_ADC1_Init(void);
+void dong_start_adc(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -72,6 +73,10 @@ static void MX_ADC1_Init(void);
   * @brief  The application entry point.
   * @retval int
   */
+#define ADC_MAX_NUM 3*5 //3?ADC,??????5??
+
+uint16_t ADC_Values[ADC_MAX_NUM]={0};
+
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -99,6 +104,7 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_TIM1_Init();
   MX_ADC1_Init();
+	dong_start_adc();
   /* USER CODE BEGIN 2 */
 uint8_t send_buf[8] = {0};
 send_buf[2] |= Keyboard_w;
@@ -114,6 +120,7 @@ int i=0;
     /* USER CODE END WHILE */
 		bitstatus = HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_9);
 		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
+		
 	/*	while (i <10000000){i++;}
 		i=0;
 		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
@@ -121,7 +128,7 @@ int i=0;
 		i=0;*/
 		if(bitstatus==GPIO_PIN_RESET)send_buf[2] |= Keyboard_w;
 		else send_buf[2] &= 0;
-		USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, send_buf, 8);
+	//	USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, send_buf, 8);
     //send_buf[0]++;
    // HAL_Delay(2000);
     /* USER CODE BEGIN 3 */
@@ -129,6 +136,14 @@ int i=0;
   /* USER CODE END 3 */
 }
 
+
+
+//????,???main?????
+void dong_start_adc(){
+    
+    //??DMA
+  HAL_ADC_Start_DMA(&hadc1,(uint32_t *)ADC_Values,ADC_MAX_NUM);
+}
 /**
   * @brief System Clock Configuration
   * @retval None
